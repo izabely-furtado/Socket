@@ -1,52 +1,170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Socket by izabely-furtado</title>
+    <meta name="viewport" content="width=640">
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen">
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
     <link rel="stylesheet" href="stylesheets/github-light.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Socket by izabely-furtado</title>
   </head>
+
   <body>
-    <div class="wrapper">
+    <a id="forkme_banner" href="https://github.com/izabely-furtado/Socket">View on GitHub</a>
+    <div class="shell">
+
       <header>
-        <h1 class="header">Socket</h1>
-        <p class="header">Um chat utilizando sockets.</p>
-
-        <ul>
-          <li class="download"><a class="buttons" href="https://github.com/izabely-furtado/Socket/zipball/master">Download ZIP</a></li>
-          <li class="download"><a class="buttons" href="https://github.com/izabely-furtado/Socket/tarball/master">Download TAR</a></li>
-          <li><a class="buttons github" href="https://github.com/izabely-furtado/Socket">View On GitHub</a></li>
-        </ul>
-
-        <p class="header">This project is maintained by <a class="header name" href="https://github.com/izabely-furtado">izabely-furtado</a></p>
-
-
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Socket</h1>
+            <h2>Um chat utilizando sockets.</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
       </header>
-      <section>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/izabely-furtado/Socket/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/izabely-furtado/Socket/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
         <h1>
 <a id="relatório" class="anchor" href="#relat%C3%B3rio" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Relatório</h1>
 
 <h2>
 <a id="motivações" class="anchor" href="#motiva%C3%A7%C3%B5es" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Motivações</h2>
 
-<h3>
-<a id="threads" class="anchor" href="#threads" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Threads</h3>
+<p>O processo de utilização sockets em um programa para que haja comunicação contém processos bloqueantes, caso este programa esteja em apenas um fluxo de execução. Essas chamadas bloqueantes são chamadas de leitura.</p>
+
+<p>As chamadas de leitura esperam uma resposta </p>
+
+<ul>
+<li>onde o servidor, por exemplo se paralisa naquele trecho de código até que alguma resposta seja emitida do lado do cliente, caso esse cliente nunca mande uma mensagem, isso pode causar um deadlock.</li>
+<li>Agora suponhamos que o cliente mandou uma mensagem, a partir desse momento, este precisa esperar de uma resposta do servidor indicando que a mensagem foi enviada com sucesso, antes disso, não pode haver o envio de outra mensagem</li>
+</ul>
 
 <h3>
-<a id="vários-clientes" class="anchor" href="#v%C3%A1rios-clientes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Vários Clientes</h3>
+<a id="threads-e-vários-clientes" class="anchor" href="#threads-e-v%C3%A1rios-clientes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Threads e vários clientes</h3>
+
+<p>Criando vários fluxos de execução e deixando pelo ou menos uma thread responsável somente pela leitura, essa chamada deixa de bloquear o programa como um todo. Assim, caso o cliente queira enviar N mensagens, essas vão ser processadas por outras threads.</p>
+
+<p>Além de evitar o deadlock a criação de threads pode colaborar para a criação de uma sala virtual com 10 clientes, por exemplo, onde nenhum destes estaria bloqueado de enviar ou receber mensagens, dado que tanto servidor, quanto no cliente o programa segue executando em paralelo as funções de <strong>Read</strong> e <strong>Write</strong>.</p>
 
 <h2>
 <a id="modificações" class="anchor" href="#modifica%C3%A7%C3%B5es" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Modificações</h2>
 
 <h3>
+<a id="use-uma-thread-adicional" class="anchor" href="#use-uma-thread-adicional" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Use uma thread adicional</h3>
+
+<p>Para que se elabore um programa em que o número de mensagens enviada por um dos usuários seja independente do número de mensagens enviada pelo outro o processo é o seguinte: usa-se uma thread a mais para processar a leitura. Dado assim a cada thread um objetivo.</p>
+
+<p>`</p>
+
+<p>//criando threads
+void CriaThread(int sockfd) {
+    int i, k;
+    //int nProc = get_nprocs();
+    int nProc = 2;</p>
+
+<pre><code>//criando vetor de threads
+threads[nProc] = (pthread_t *) malloc(nProc * sizeof (pthread_t));
+
+//dando a cada thread um objetivo
+
+pthread_create(&amp;(threads[0]), NULL, &amp;Read, sockfd);
+pthread_create(&amp;(threads[i]), NULL, &amp;Write, sockfd);
+
+//mandando bala
+for (k = 0; k &lt; nProc; k++) {
+    pthread_join(threads[k], NULL);
+}
+</code></pre>
+
+<p>}</p>
+
+<p>`</p>
+
+<h3>
 <a id="10-clientes" class="anchor" href="#10-clientes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>10 Clientes</h3>
+
+<p><strong>No servidor</strong></p>
+
+<p>`</p>
+
+<p>//criando threads
+void CriaThread(int newsockfd) {
+    int i, k;
+    //int nProc = get_nprocs();
+    int nProc = 11;     //10 clientes para ler msg e um para enviar resposta</p>
+
+<pre><code>//criando vetor de threads
+threads[nProc] = (pthread_t *) malloc(nProc * sizeof (pthread_t));
+
+//dando a cada thread um objetivo
+pthread_create(&amp;(threads[0]), NULL, &amp;Write, newsockfd)
+
+for (i = 1; i &lt; nProc; i++) {
+    pthread_create(&amp;(threads[i]), NULL, &amp;Read, newsockfd);
+}
+
+//mandando bala
+for (k = 0; k &lt; nProc; k++) {
+    pthread_join(threads[k], NULL);
+}
+</code></pre>
+
+<p>}</p>
+
+<p>`</p>
+
+<p><strong>No Cliente</strong></p>
+
+<p>`</p>
+
+<p>//criando threads
+void CriaThread(int sockfd) {
+    int i, k;
+    //int nProc = get_nprocs();
+    int nProc = 11;     //10 clientes e um para ler msgs do servidor</p>
+
+<pre><code>//criando vetor de threads
+threads[nProc] = (pthread_t *) malloc(nProc * sizeof (pthread_t));
+
+//dando a cada thread um objetivo
+
+pthread_create(&amp;(threads[0]), NULL, &amp;Read, sockfd);
+
+for (i = 1; i &lt; nProc; i++) {
+    pthread_create(&amp;(threads[i]), NULL, &amp;Write, sockfd);
+}
+
+//mandando bala
+for (k = 0; k &lt; nProc; k++) {
+    pthread_join(threads[k], NULL);
+}
+</code></pre>
+
+<p>}</p>
+
+<p>`</p>
 
 <h2>
 <a id="servidor" class="anchor" href="#servidor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Servidor</h2>
@@ -69,11 +187,21 @@
 <h2>
 <a id="main" class="anchor" href="#main" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Main</h2>
       </section>
+
       <footer>
-        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/izabely-furtado">izabely-furtado</a> can be found on <a href="https://github.com/izabely-furtado/Socket">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="https://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
       </footer>
+
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-		
+
+    
   </body>
 </html>
