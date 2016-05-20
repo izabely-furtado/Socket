@@ -1,0 +1,6 @@
+{
+  "name": "Socket",
+  "tagline": "Um chat utilizando sockets.",
+  "body": "# Relatório\r\n\r\n## Motivações\r\n\r\n### Threads\r\n\r\n### Vários Clientes\r\n\r\n## Modificações\r\n\r\n### 10 Clientes\r\n\r\n## Servidor\r\n\r\n### Read\r\n\r\n### Write\r\n\r\n## Cliente\r\n\r\n### Write\r\n\r\n### Read\r\n\r\n## Main",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
