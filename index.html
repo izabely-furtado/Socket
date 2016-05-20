@@ -1,45 +1,25 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Socket by izabely-furtado</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-dark.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/main.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
+    <section class="page-header">
+      <h1 class="project-name">Socket</h1>
+      <h2 class="project-tagline">Um chat utilizando sockets.</h2>
+      <a href="https://github.com/izabely-furtado/Socket" class="btn">View on GitHub</a>
+      <a href="https://github.com/izabely-furtado/Socket/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/izabely-furtado/Socket/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-      <header>
-        <h1>Socket</h1>
-        <p>Um chat utilizando sockets.</p>
-      </header>
-
-      <div id="banner">
-        <span id="logo"></span>
-
-        <a href="https://github.com/izabely-furtado/Socket" class="button fork"><strong>View On GitHub</strong></a>
-        <div class="downloads">
-          <span>Downloads:</span>
-          <ul>
-            <li><a href="https://github.com/izabely-furtado/Socket/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/izabely-furtado/Socket/tarball/master" class="button">TAR</a></li>
-          </ul>
-        </div>
-      </div><!-- end banner -->
-
-    <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
-      <section>
-        <h1>
+    <section class="main-content">
+      <h1>
 <a id="relatório" class="anchor" href="#relat%C3%B3rio" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Relatório</h1>
 
 <h2>
@@ -171,8 +151,47 @@ for (k = 0; k &lt; nProc; k++) {
 <h3>
 <a id="read" class="anchor" href="#read" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Read</h3>
 
+<p>`</p>
+
+<p>//lendo do buffer</p>
+
+<p>void *Read(int newsockfd) {</p>
+
+<pre><code>bzero(buffer,256);
+n = read(newsockfd,buffer,255);
+if (n &lt; 0) {
+    error("ERROR reading from socket");
+}
+while (strcmp(buffer, "bye")!=0){
+    printf("Here is the message: %s\n",buffer);
+}
+printf("Comunicação encerrada");
+</code></pre>
+
+<p>}</p>
+
+<p>`</p>
+
 <h3>
 <a id="write" class="anchor" href="#write" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Write</h3>
+
+<p>`</p>
+
+<p>//escrevendo no buffer</p>
+
+<p>void *Write(int newsockfd){</p>
+
+<pre><code>int n;
+
+n = write(newsockfd,"I got your message",18);
+ if (n &lt; 0) {
+     error("ERROR writing to socket");
+}
+</code></pre>
+
+<p>}</p>
+
+<p>`</p>
 
 <h2>
 <a id="cliente" class="anchor" href="#cliente" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Cliente</h2>
@@ -180,18 +199,63 @@ for (k = 0; k &lt; nProc; k++) {
 <h3>
 <a id="write-1" class="anchor" href="#write-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Write</h3>
 
+<p>`</p>
+
+<p>//escrevendo no buffer</p>
+
+<p>int *Write(int sockfd){</p>
+
+<pre><code>int n;
+
+do{
+    bzero(buffer,256);
+    fgets(buffer,255,stdin);
+    printf("Please enter the message: ");
+
+    n = write(sockfd,buffer,strlen(buffer));
+
+    if (n &lt; 0) {
+        error("ERROR writing to socket");
+    }
+
+}while (strcmp(buffer, "bye")!=0)
+
+return sockfd;
+</code></pre>
+
+<p>}</p>
+
+<p>`</p>
+
 <h3>
 <a id="read-1" class="anchor" href="#read-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Read</h3>
 
+<p>`</p>
+
+<p>//lendo do buffer</p>
+
+<p>void *Read(int sockfd) {
+    int n;
+    n = read(sockfd,buffer,255);
+    if (n &lt; 0) 
+         error("ERROR reading from socket");
+    printf("%s\n",buffer);</p>
+
+<p>}</p>
+
+<p>`</p>
+
 <h2>
 <a id="main" class="anchor" href="#main" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Main</h2>
-      </section>
-      <footer>
-        <p>Project maintained by <a href="https://github.com/izabely-furtado">izabely-furtado</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/izabely-furtado/Socket">Socket</a> is maintained by <a href="https://github.com/izabely-furtado">izabely-furtado</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+
+    </section>
+
+  
   </body>
 </html>
