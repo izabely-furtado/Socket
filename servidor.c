@@ -62,7 +62,7 @@ void *Read(int newsockfd) {
     while (strcmp(buffer, "bye")!=0){
     	printf("Here is the message: %s\n",buffer);
     }
-    printf("Comunicação encerrada");
+    printf("ComunicaÃ§Ã£o encerrada");
 
 }
 
