@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -27,14 +29,23 @@ public class Controlador implements Runnable {
     public void run() {
         // quando chegar uma msg, distribui pra todos
         Scanner entrada = new Scanner(this.cliente);
+        //lendo entradas dos clientes até bye
         while (entrada.hasNextLine()) {
             servidor.escreve(entrada.nextLine());
             String entra = entrada.nextLine();
             if ("bye".equals(entra)) {
+                try {
+                    //fecha cliente
+                    this.cliente.close();
+                } catch (IOException ex) {
+                    break;
+                }
+                System.out.println("Cliente saiu");
                 break;
             }
         }
         entrada.close();
+        
     }
 
     public static void main(String[] args)
