@@ -17,65 +17,52 @@ import java.util.logging.Logger;
  *
  * @author IzabelyFurtado
  */
-public class Client implements Runnable{
-
+public class Client{ //implements Runnable {
     Socket cliente;
+
+    private String host;
+    private int porta;
     
-    Client(String ipCliente, int ipServidor) throws IOException{
-        this.cliente = new Socket(ipCliente, ipServidor);
-        System.out.println("O cliente " + ipCliente + 
-                           " se conectou ao servidor " + ipServidor + " !");
-        
+
+    public Client(String host, int portaServidor) throws IOException {
+        this.host = host;
+        this.porta = portaServidor;
+        this.cliente = new Socket(this.host, this.porta);
+        System.out.println("O cliente " + this.host + 
+                           " se conectou ao servidor " + this.porta + "!");
     }
-    
+
     //lendo do teclado e enviado para o servidor
-    public void leituraEscrita() throws IOException{
+    public void leituraEscrita() throws IOException {
         Scanner teclado = new Scanner(System.in);
         PrintStream saida = new PrintStream(this.cliente.getOutputStream());
-        
+
         while (teclado.hasNextLine()) {
             String sai = teclado.nextLine();
             saida.println(sai);
-            if("bye".equals(sai)){
+            if ("bye".equals(sai)) {
                 break;
             }
         }
-        
+
         //impossibilitando novas envios ao servidor
         saida.close();
         //impossibilitando novas leituras do teclado
         teclado.close();
-        
-    }
-        
-    public static void main(String[] args)
-            throws UnknownHostException, IOException {
-        Client cliente = new Client("127.0.0.1", 12345);
-        
-        //lendo do teclado
-        cliente.leituraEscrita();
-        
-        //desligando cliente
-        cliente.cliente.close();
+
     }
 
-    @Override
-    public void run() {
+    public static void vai(String host, int portaServidor) throws UnknownHostException, IOException {
+        Client cli = new Client("127.0.0.1", 12345);
+
+        // thread para receber mensagens do servidor
+        Servente r = new Servente(cli.cliente.getInputStream());
+        new Thread(r).start();
+
+        // lê msgs do teclado e manda pro servidor
+        cli.leituraEscrita();
         
-        try {
-            //lendo do teclado
-            this.leituraEscrita();
-        } catch (IOException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        try {
-            //desligando cliente
-            this.cliente.close();
-        } catch (IOException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+        //desligando o cliente
+        cli.cliente.close();
     }
-    
 }
