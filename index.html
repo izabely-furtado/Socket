@@ -52,6 +52,10 @@
 
 <p>Quando um dos usuários digitar "bye" a conexão deve ser encerrada.</p>
 
+<p>Houveram duas implementações
+Em java = na pasta javaSocket (mais válida)
+Em c = na pasta cSocket</p>
+
 <h2>
 <a id="motivações" class="anchor" href="#motiva%C3%A7%C3%B5es" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Motivações</h2>
 
@@ -78,6 +82,8 @@
 <a id="use-uma-thread-adicional" class="anchor" href="#use-uma-thread-adicional" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Use uma thread adicional</h3>
 
 <p>Para que se elabore um programa em que o número de mensagens enviada por um dos usuários seja independente do número de mensagens enviada pelo outro o processo é o seguinte: usa-se uma thread a mais para processar a leitura. Dado assim a cada thread um objetivo.</p>
+
+<p><strong>Em C</strong></p>
 
 <p>`</p>
 
@@ -107,8 +113,35 @@ for (k = 0; k &lt; nProc; k++) {
 
 <p>`</p>
 
+<p><strong>Em Java</strong></p>
+
+<p>A partir da versao4 indicada no github, para que o servidor seja capaz de trabalhar com dois clientes ao mesmo tempo é necessário criar uma thread logo após executar o método accept.</p>
+
+<p>A thread criada será responsável pelo tratamento dessa conexão, enquanto o laço do servidor disponibilizará a porta para uma nova conexão:</p>
+
+<p>`</p>
+
+<p>while (true) {</p>
+
+<p>Socket cliente = servidor.accept();</p>
+
+<p>// cria um objeto que vai tratar a conexão
+  Controlador serv = new Controlador(cliente);</p>
+
+<p>// cria a thread em cima deste objeto
+  Thread t = new Thread(tratamento);</p>
+
+<p>// inicia a thread
+  t.start();</p>
+
+<p>}</p>
+
+<p>`</p>
+
 <h3>
 <a id="10-clientes" class="anchor" href="#10-clientes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>10 Clientes</h3>
+
+<p><strong>Em C</strong></p>
 
 <p><strong>No servidor</strong></p>
 
@@ -175,11 +208,46 @@ for (k = 0; k &lt; nProc; k++) {
 
 <p>`</p>
 
+<p><strong>Em Java</strong></p>
+
+<p>Foi Elaborado um controlador e um Servente, para que as threads pudessem ser utilizadas executando o run() dessas classes</p>
+
+<p>No controlador indica a parada de conexão com os clientes</p>
+
+<p>`</p>
+
+<p>public void run() {
+        // quando chegar uma msg, distribui pra todos
+        Scanner entrada = new Scanner(this.cliente);
+        //lendo entradas dos clientes até bye
+        while (entrada.hasNextLine()) {
+            servidor.escreve(entrada.nextLine());
+            String entra = entrada.nextLine();
+            if ("bye".equals(entra)) {
+                try {
+                    //fecha cliente
+                    this.cliente.close();
+                } catch (IOException ex) {
+                    break;
+                }
+                System.out.println("Cliente saiu");
+                break;
+            }
+        }
+        entrada.close();</p>
+
+<pre><code>}
+</code></pre>
+
+<p>`</p>
+
 <h2>
 <a id="servidor" class="anchor" href="#servidor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Servidor</h2>
 
 <h3>
 <a id="read" class="anchor" href="#read" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Read</h3>
+
+<p><strong>Em C</strong></p>
 
 <p>`</p>
 
@@ -202,8 +270,14 @@ printf("Comunicação encerrada");
 
 <p>`</p>
 
+<p><strong>Em Java</strong></p>
+
+<p>A leitura é mostrada no controlador</p>
+
 <h3>
 <a id="write" class="anchor" href="#write" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Write</h3>
+
+<p><strong>Em C</strong></p>
 
 <p>`</p>
 
@@ -223,11 +297,26 @@ n = write(newsockfd,"I got your message",18);
 
 <p>`</p>
 
+<p><strong>Em Java</strong></p>
+
+<p>`</p>
+
+<p>public void escreve(String msg) {
+        // envia msg para todo mundo
+        for (PrintStream cliente : this.clientes) {
+            cliente.println(msg + " foi recebido");
+        }
+    }</p>
+
+<p>`</p>
+
 <h2>
 <a id="cliente" class="anchor" href="#cliente" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Cliente</h2>
 
 <h3>
 <a id="write-1" class="anchor" href="#write-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Write</h3>
+
+<p><strong>Em C</strong></p>
 
 <p>`</p>
 
@@ -277,8 +366,37 @@ return sockfd;
 
 <p>`</p>
 
+<p><strong>Em Java</strong></p>
+
 <h2>
-<a id="main" class="anchor" href="#main" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Main</h2>
+<a id="lendo-e-escrevendo" class="anchor" href="#lendo-e-escrevendo" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lendo e Escrevendo</h2>
+
+<p>`</p>
+
+<p>//lendo do teclado e enviado para o servidor
+    public void leituraEscrita() throws IOException {
+        Scanner teclado = new Scanner(System.in);
+        PrintStream saida = new PrintStream(this.cliente.getOutputStream());</p>
+
+<pre><code>    while (teclado.hasNextLine()) {
+        String sai = teclado.nextLine();
+        saida.println(sai);
+        if ("bye".equals(sai)) {
+            break;
+        }
+    }
+
+    //impossibilitando novas envios ao servidor
+    saida.close();
+    //impossibilitando novas leituras do teclado
+    teclado.close();
+
+}
+</code></pre>
+
+<p>`</p>
+
+<p>EXECUTE PRIMEIRO O SERVIDOR E DEPOIS O CLIENTE (EM C) OU CONTROLADOR (EM JAVA)</p>
       </section>
       <footer>
         <p>Project maintained by <a href="https://github.com/izabely-furtado">izabely-furtado</a></p>
